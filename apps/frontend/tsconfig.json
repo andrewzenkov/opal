@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    // "bun" covers both the dev server in dev.ts and the `import ... from
+    // './index.html'` module declaration that Bun's bundler provides.
+    "types": ["bun"]
+  },
+  "include": ["src", "dev.ts"]
+}

@@ -1,0 +1,11 @@
+# Opal: static profile, no backend.
+name: opal
+
+services:
+  opal-frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+    image: multicore/opal-frontend:latest
+    ports: ['8083:80']
+    restart: unless-stopped

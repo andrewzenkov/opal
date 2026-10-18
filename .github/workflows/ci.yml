@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: lint · typecheck · test · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: opal
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+
+      - run: bun install --frozen-lockfile
+        working-directory: opal
+      - run: bun run format:check
+        working-directory: opal
+      - run: bun run lint
+        working-directory: opal
+      - run: bun run typecheck
+        working-directory: opal
+      - run: bun run test
+        working-directory: opal
+      - run: bun run build
+        working-directory: opal
+
+  images:
+    name: docker build (${{ matrix.part }})
+    runs-on: ubuntu-latest
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [frontend]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: opal
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds every image on each PR so a broken Dockerfile never reaches main.
+      # Add `push: true` plus a registry login here when you have somewhere to
+      # deploy to; the deploy itself is then `docker compose pull && up -d`.
+      - uses: docker/build-push-action@v6
+        with:
+          context: opal
+          file: opal/apps/${{ matrix.part }}/Dockerfile
+          tags: multicore/opal-${{ matrix.part }}:${{ github.sha }}
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
