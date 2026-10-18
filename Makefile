@@ -18,7 +18,7 @@ typecheck:
 test:
 	bun run test
 
-# Everything CI runs, locally.
+# Everything that must pass before pushing.
 check: lint typecheck test build
 
 # Lint, typecheck and test only what changed.
