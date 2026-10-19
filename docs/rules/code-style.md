@@ -56,7 +56,7 @@ updateFlag(me, id, dataIn);
 ## Data models
 
 - Data the app receives — a request body or query, a chat or MCP tool payload, anything from
-  outside — is a **model class** with `@Field` rules from `bedrock`, never an interface. Name it
+  outside — is a **model class** with `@Field` rules from `bedrock/core`, never an interface. Name it
   `<Purpose>Model` (`CreateTaskModel`) and put it in the feature's `models/<feature>.modelIn.ts`.
 - Name the model as `dataIn` or `query` in `RequestContext(...)`; Bedrock validates and builds
   it. Never validate a request by hand.
@@ -69,7 +69,7 @@ updateFlag(me, id, dataIn);
 - Always use braces for `if`, `else`, `for` and `while` bodies, even one-liners.
   ESLint enforces this with `curly: all`.
 - Prefer small named helpers over nested ternaries.
-- Generate ids, secrets and timestamps with `CommonUtils` from `bedrock`:
+- Generate ids, secrets and timestamps with `CommonUtils` from `bedrock/core`:
   `createId()`, `createId({ prefix: 'task' })`, `createSecret()`, `now()`, `nowIso()` and
   `toIso(timestamp)`. Never call `crypto.randomUUID()`, `Date.now()` or
   `new Date().toISOString()` directly in backend code. The frontends do not depend on the
@@ -89,6 +89,6 @@ updateFlag(me, id, dataIn);
 - Use `import type` for type-only imports. Use **value** imports for request, model and DI
   classes so decorator metadata keeps them at runtime.
 - Group imports in two blocks separated by one empty line: package imports first (bare
-  specifiers such as `bedrock`, `react` or `@onyx/shared`), then the project's own files
+  specifiers such as `bedrock/core`, `react` or `@onyx/shared`), then the project's own files
   (relative paths). Put no empty lines inside a block.
 - Match the surrounding code's comment density and naming. Comment why, not what.
