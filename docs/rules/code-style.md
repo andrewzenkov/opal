@@ -14,13 +14,16 @@ Write code for the next human reader. These rules apply to every TypeScript file
   open({ me, sessionId, secure }: { me: Me; sessionId?: string; secure: boolean }) {}
 
   // Prefer:
-  export interface OpenSessionData {
+  export class OpenSessionModel {
+    @Field.String({ optional: true })
     sessionId?: string;
-    secure: boolean;
+
+    @Field.Boolean()
+    secure!: boolean;
   }
   export interface OpenSessionInput {
     me: Me;
-    dataIn: OpenSessionData;
+    dataIn: OpenSessionModel;
   }
   open({ me, dataIn }: OpenSessionInput) {}
   ```
@@ -28,7 +31,7 @@ Write code for the next human reader. These rules apply to every TypeScript file
 - Application operations take one object: the trusted caller `me`, the validated `dataIn`, and
   `id` next to `dataIn` when the operation targets one record. Each operation declares its own
   named input type in the app (`UpdateNoteInput { me; id; dataIn }`); the framework provides no
-  generic input wrappers. Operation parameters (such as `sessionId`) go inside `dataIn`. Trusted, resolver-derived context (`me`, Mica's `demo`) stays outside `dataIn`.
+  generic input wrappers. Operation parameters (such as `sessionId`) go inside `dataIn`. Trusted context (`me` from the guard, Mica's `demo` from its resolver) stays outside `dataIn`.
 - Add optional inputs as optional object properties. Avoid positional booleans and
   placeholder `undefined` arguments.
 - A function with one simple input can keep it directly, e.g. `digest(value: string)`.
@@ -49,6 +52,17 @@ function updateFlag({ me, id, dataIn }: UpdateFlagInput): Context<JasperFlag> {}
 // Avoid:
 updateFlag(me, id, dataIn);
 ```
+
+## Data models
+
+- Data the app receives — a request body or query, a chat or MCP tool payload, anything from
+  outside — is a **model class** with `@Field` rules from `bedrock`, never an interface. Name it
+  `<Purpose>Model` (`CreateTaskModel`) and put it in the feature's `models/<feature>.modelIn.ts`.
+- Name the model as `dataIn` or `query` in `RequestContext(...)`; Bedrock validates and builds
+  it. Never validate a request by hand.
+- Use an interface only where a class adds nothing: a function's named input object
+  (`UpdateTaskInput`), a repository record, or a contract the frontend shares. A model the
+  frontend also sends `implements` that shared type, so the two cannot drift.
 
 ## Readability
 
@@ -72,6 +86,9 @@ updateFlag(me, id, dataIn);
   shortened noun such as `notes`, which reads like a repository or a list.
 - Use TypeScript access modifiers (`private readonly x`), never ECMAScript `#private` fields.
 - Omit `public`; write `private` or `protected` explicitly.
-- Use `import type` for type-only imports. Use **value** imports for request, DTO and DI
+- Use `import type` for type-only imports. Use **value** imports for request, model and DI
   classes so decorator metadata keeps them at runtime.
+- Group imports in two blocks separated by one empty line: package imports first (bare
+  specifiers such as `bedrock`, `react` or `@onyx/shared`), then the project's own files
+  (relative paths). Put no empty lines inside a block.
 - Match the surrounding code's comment density and naming. Comment why, not what.
